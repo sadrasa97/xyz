@@ -10,23 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # used to cache dependencies with a timeout
+      # Updated step to use Environment Files instead of set-output command
       - name: Get Date
-        id: get-date
-        run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+        run: echo "DATE=$(date -u +%Y%m%d)" >> $GITHUB_ENV
         shell: bash
 
+      # The rest of your workflow continues here...
       - name: Cache Buildozer global directory
         uses: actions/cache@v2
         with:
           path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
+          key: buildozer-global-${{ env.DATE }}-${{ hashFiles('buildozer.spec') }} 
 
       - uses: actions/cache@v2
         with:
           path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-${{ env.DATE }}-${{ hashFiles('buildozer.spec') }}
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
